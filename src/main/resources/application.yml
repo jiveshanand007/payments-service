@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: payments-service
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/payments}
+    username: ${DATABASE_USERNAME:payments}
+    password: ${DATABASE_PASSWORD:payments}
+  jackson:
+    # The public API and Razorpay both speak snake_case JSON.
+    property-naming-strategy: SNAKE_CASE
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+payments:
+  # Where this service is reachable from the internet; the provider sends customers back here.
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
+  checkout-expiry: ${CHECKOUT_EXPIRY:30m}
+  razorpay:
+    base-url: ${RAZORPAY_BASE_URL:https://api.razorpay.com}
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  outbox:
+    max-attempts: 10
+    batch-size: 10
+    timeout: 5s
+    poll-interval: PT2S
+  # Websites allowed to use this service. Set them with indexed environment variables, e.g.
+  #   PAYMENTS_SITES_0_ID=portfolio
+  #   PAYMENTS_SITES_0_API_KEY_SHA256=<sha256 hex of the site's API key>
+  #   PAYMENTS_SITES_0_WEBHOOK_URL=https://example.com/api/payments/webhook
+  #   PAYMENTS_SITES_0_WEBHOOK_SECRET=<random secret shared with the site>
+  #   PAYMENTS_SITES_0_ALLOWED_REDIRECT_ORIGINS_0=https://example.com
+  sites: []
